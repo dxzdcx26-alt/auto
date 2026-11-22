@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "button": "node interaction-server.js --send-panel"
+  },
   "dependencies": {
     "cluster": "^0.7.7",
     "colors": "^1.4.0",

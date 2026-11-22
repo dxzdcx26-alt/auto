@@ -359,11 +359,12 @@ if (isMaster) {
     console.log(logo + '\n');
 
     const config = readConfig();
-    const loop = readlineSync.questionInt('Rounds : ');
-    const usernameInput = readlineSync.question('Prefix username (e.g., Zemon_): ');
-    const concurrencyInput = readlineSync.question('Concurrency (รันพร้อมกันกี่รอบ) [1]: ', { defaultInput: '1' });
+    const autoMode = process.env.AUTO_MODE === 'true';
+    const loop = autoMode ? (parseInt(process.env.AUTO_ROUNDS, 10) || 1) : readlineSync.questionInt('Rounds : ');
+    const usernameInput = autoMode ? (process.env.AUTO_PREFIX || '') : readlineSync.question('Prefix username (e.g., Zemon_): ');
+    const concurrencyInput = autoMode ? (process.env.AUTO_CONCURRENCY || '1') : readlineSync.question('Concurrency (รันพร้อมกันกี่รอบ) [1]: ', { defaultInput: '1' });
     const concurrency = Math.max(1, parseInt(concurrencyInput, 10) || 1);
-    const headlessInput = readlineSync.question('Headless? (แนะนำ N เพราะต้องแก้ CAPTCHA) [N]: ', { defaultInput: 'N' });
+    const headlessInput = autoMode ? (process.env.AUTO_HEADLESS || 'N') : readlineSync.question('Headless? (แนะนำ N เพราะต้องแก้ CAPTCHA) [N]: ', { defaultInput: 'N' });
     const headless = /^y/i.test(headlessInput.trim());
     sendStartWebhook({ rounds: loop, prefix: usernameInput, concurrency, headless, time: timestamp() })
         .catch((err) => console.error(`✖ Start Webhook: ${err.message}`));
