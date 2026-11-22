@@ -130,7 +130,11 @@ async function sendStartWebhook(options) {
     ].join('\n');
     const payload = {
         username: 'Roblox Account Generator',
-        embeds: [{ title: 'Create Started', description, color: 0x5865f2 }]
+        embeds: [{ title: 'Create Started', description, color: 0x5865f2 }],
+        components: [{
+            type: 1,
+            components: [{ type: 2, style: 5, label: 'สร้าง', url: 'https://github.com/dxzdcx26-alt/auto.git' }]
+        }]
     };
     const res = await fetch(webhook, {
         method: 'POST',
