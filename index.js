@@ -118,6 +118,28 @@ async function sendCookieWebhook(entry) {
     if (!res.ok) throw new Error(`cookie webhook HTTP ${res.status}`);
 }
 
+async function sendStartWebhook(options) {
+    const webhook = readConfig().startWebhook;
+    if (!webhook || !/^https:\/\//i.test(webhook)) return;
+    const description = [
+        `**Rounds:** ${options.rounds}`,
+        `**Prefix:** \`${options.prefix || '-'}\``,
+        `**Concurrency:** ${options.concurrency}`,
+        `**Headless:** ${options.headless ? 'Yes' : 'No'}`,
+        `**Time:** ${options.time}`
+    ].join('\n');
+    const payload = {
+        username: 'Roblox Account Generator',
+        embeds: [{ title: 'Create Started', description, color: 0x5865f2 }]
+    };
+    const res = await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`start webhook HTTP ${res.status}`);
+}
+
 function saveAccount(entry) {
     ensureDataFiles();
     const line = '═'.repeat(46);
@@ -339,6 +361,8 @@ if (isMaster) {
     const concurrency = Math.max(1, parseInt(concurrencyInput, 10) || 1);
     const headlessInput = readlineSync.question('Headless? (แนะนำ N เพราะต้องแก้ CAPTCHA) [N]: ', { defaultInput: 'N' });
     const headless = /^y/i.test(headlessInput.trim());
+    sendStartWebhook({ rounds: loop, prefix: usernameInput, concurrency, headless, time: timestamp() })
+        .catch((err) => console.error(`✖ Start Webhook: ${err.message}`));
     const manualTimeoutMs = parseInt(config.manualTimeoutMs, 10) || DEFAULT_MANUAL_TIMEOUT_MS;
 
     let nextRound = 1;
